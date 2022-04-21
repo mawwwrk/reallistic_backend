@@ -34,7 +34,8 @@
   },
   "scripts": {
     "test": "jest",
-    "dev": "nodemon server.js"
+    "startcontainer": "docker run --rm --name mongo -p 27017:27017 -d mongo:latest",
+    "devAuth": "debug=Auth:* nodemon server.js"
   },
   "repository": {
     "type": "git",

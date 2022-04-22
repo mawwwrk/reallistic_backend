@@ -1,3 +1,5 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable promise/always-return */
 import {
   hash,
   compare,
@@ -51,51 +53,43 @@ describe("presavehook", () => {
   });
 });
 
+const compMock = jest.fn((i) => i === "right password");
+
 describe("authUser instance method", () => {
   const user = {
     username: "username",
     password: "password",
     accountType: "admin",
-    comparePassword: jest.fn(),
+    comparePassword: compMock,
   };
+
+  const findMock = jest.fn((i) =>
+    i.username === "username" ? Promise.resolve(user) : Promise.resolve()
+  );
+
   const userModel = {
-    findOne: jest.fn(),
+    findOne: findMock,
   };
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it("returns undefined when user is not found", async () => {
-    // eslint-disable-next-line unicorn/no-null
-    userModel.findOne.mockResolvedValueOnce(null);
-    expect(user.comparePassword).not.toHaveBeenCalled();
-    const result = await authenticateUser.call(userModel, user);
-    expect(result).toBeUndefined();
-  });
-
-  it("returns undefined when password does not match", async () => {
-    userModel.findOne.mockReturnValueOnce(user);
-    user.comparePassword.mockResolvedValueOnce(false);
-    const result = await authenticateUser.call(userModel, {
-      ...user,
-      password: "wrong password",
-    });
-    expect(result).toBeUndefined();
-  });
-
-  it("returns user when password matches", async () => {
-    userModel.findOne.mockReturnValueOnce(user);
-    user.comparePassword.mockResolvedValueOnce(true);
-    const result = await authenticateUser.call(userModel, user);
-    expect(result).toBe(user);
-  });
+  it.each`
+    username          | password            | expected | returnVal
+    ${user.username}  | ${"wrong password"} | ${1}     | ${new Error("failed authentication")}
+    ${"any old name"} | ${user.password}    | ${0}     | ${new Error("failed authentication")}
+    ${user.username}  | ${"right password"} | ${1}     | ${user}
+  `(
+    "returns $expected when username and password match",
+    async ({ username, password, expected, returnVal }) => {
+      const result = await authenticateUser.call(userModel, {
+        username,
+        password,
+      });
+      expect(result).toEqual(returnVal);
+      expect(findMock.mock.calls).toHaveLength(1);
+      expect(compMock.mock.calls).toHaveLength(expected);
+    }
+  );
 });
-
-//   export async function authUser(this, { username, password }) {
-//     const user = await this.findOne({ username });
-//     if (!user) return;
-//     const isMatch = await user.comparePassword(password);
-//     if (!isMatch) return;
-//     return user;
-//   }

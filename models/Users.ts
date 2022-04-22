@@ -1,10 +1,10 @@
-import * as mongoose from "mongoose";
+import mongoose from "mongoose";
 
 import * as bcrypt from "bcrypt";
 
 const accountTypes = ["admin", "lister", "owner", "agent", "renter"] as const;
 
-interface IUser {
+export interface IUser {
   username: string;
   password: string;
   accountType: typeof accountTypes[number];
@@ -40,10 +40,9 @@ export async function authenticateUser(
   { username, password }: { username: string; password: string }
 ) {
   const user = await this.findOne({ username });
-  if (!user) return;
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) return;
-  return user;
+  return user?.comparePassword(password)
+    ? user
+    : undefined;
 }
 
 interface IUserModel

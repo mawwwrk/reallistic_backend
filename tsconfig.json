@@ -3,10 +3,10 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "module": "CommonJS",
     "lib": ["DOM", "ESNext"],
-    "allowJs": true,
-    "target": "ES6",
+    "target": "ESnext",
     "rootDir": ".",
     "noEmit": false,
     "watch": true
@@ -15,5 +15,5 @@
     "enable": true,
     "enableAutoDiscovery": true
   },
-  "files": ["models/Users.ts"]
+  "files": ["models/Users.ts", "util/authentication.ts"]
 }

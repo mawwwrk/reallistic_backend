@@ -43,7 +43,11 @@ app
   .use(
     cors({
       credentials: true,
-      origin: frontEndUrls,
+      origin: [
+        "http://localhost",
+        "http://localhost:3000",
+        "https://app-beta.vercelapp.com",
+      ],
       methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     })
   )

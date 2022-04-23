@@ -40,18 +40,15 @@ const verifyRefreshToken = (token, fgp) => {
   return sha256hash(tfgp) === fgp ? decoded : false;
 };
 
-authMiddleWare = (req, res, next) => {
+const authMiddleWare = (req, res, next) => {
   const cookie = req.cookies;
   const headers = req.headers;
-
-
-
 
   if (!cookie) return next();
   const decoded = verifyRefreshToken(cookie, req.cookies.fgp);
   if (!decoded) return next();
   req.user = decoded;
-
-
+  next();
+};
 
 export { generateAccessToken, generateRefreshToken, verifyRefreshToken };

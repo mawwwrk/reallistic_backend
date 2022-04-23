@@ -1,26 +1,12 @@
-/* eslint-env node, amd */
-const eslintrcPath = process.env.ESLINTRC_PATH ?? undefined;
+const myConfig = process.env.eslintrc;
 
-const defaultConfig = {
-  extends: ["eslint:recommended", "prettier"],
+const config = {
+  root: true,
   env: {
-    es2022: true,
-  },
-  parserOptions: { ecmaVersion: "latest" },
-};
-
-const myConfig = {
-  extends: [eslintrcPath],
-  env: {
-    es2022: true,
+    esnext: true,
     node: true,
-    amd: true,
   },
-  rules: {
-    "unicorn/prefer-module": "off",
-  },
+  extends: [myConfig],
 };
-
-const config = eslintrcPath ? myConfig : defaultConfig;
 
 module.exports = config;

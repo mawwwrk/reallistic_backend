@@ -55,7 +55,7 @@ async function authenticateUser({ username, password }) {
     const user = await this.findOne({ username });
     return user?.comparePassword(password)
         ? user
-        : new Error("failed authentication");
+        : undefined;
 }
 exports.authenticateUser = authenticateUser;
 const userSchema = new mongoose_1.default.Schema({

@@ -2,7 +2,7 @@ const express = require("express");
 // const { Listing } = require("../models/Listing");
 const { User } = require("../models/Users");
 
-const dbga = require("debug")("app:auth");
+const dbg = require("debug")("app:auth");
 
 const {
   generateAccessToken,
@@ -13,7 +13,7 @@ const {
 const router = express.Router();
 
 router.get("/seed", async (req, res) => {
-  dbga("seed");
+  dbg.extend("seed");
   await User.deleteMany().exec();
   const users = [
     {
@@ -93,62 +93,52 @@ router.get("/check", async (req, res) => {
 
 //*
 router.post("/login", async (req, res) => {
+  dbg.extend("login")("req.body", req.body);
   const failResponse = {
     success: false,
     message: "Invalid username or password",
   };
   try {
-
     const user = await User.findOne({ username: req.body.username });
+    dbg.extend("login")("user", user);
     if (!user) return res.status(401).json(failResponse);
 
     const isMatch = user.comparePassword(req.body.password, (err, isMatch) => {
       if (err)
-        return res.status(500).json({ ...failResponse, message: "Error comparing passwords" });
-      if (!isMatch)
-        return res.status(401).json(failResponse);
+        return res
+          .status(500)
+          .json({ ...failResponse, message: "Error comparing passwords" });
+      if (!isMatch) return res.status(401).json(failResponse);
     });
 
     if (user && isMatch) {
-      const accessToken = generateAccessToken(user);
-      const [refreshToken,fgp] = generateRefreshToken(user);
-      return res.cookie(
-        "__secure-fgp", fgp,{
+      const { username, accountType } = user;
+      const accessToken = generateAccessToken({ username });
+      const [refreshToken, fgp] = generateRefreshToken(username);
+      dbg.extend("login")("tokens", { accessToken, refreshToken, fgp });
+      return res
+        .status(200)
+        .cookie("__secure-fgp", fgp, {
           httpOnly: true,
           secure: true,
           domain: "localhost",
           signed: true,
           maxAge: 1000 * 60 * 60 * 24 * 7,
-        }
-      ) json({
-        success: true,
-        message: "Login successful",
-        token: accessToken,
-        refreshToken: refreshToken}).
-
-
-  const jwt = generateAccessToken({ username, accountType });
-  console.log("jwt", jwt);
-  const [refreshToken, fgp] = generateRefreshToken();
-
-  const tokens = {
-    jwt,
-    refreshToken,
-  };
-
-  return res
-  .status(200)
-  .cookie("__secure-fgp", fgp, {
-    domain: "localhost",
-    secure: true,
-    httpOnly: true,
-  })
-  .json(tokens);
-} catch (error) {
-  console.log(error);
-  return res.status(500).json({ message: "Error logging in" });
-}
-}
+        })
+        .json({
+          success: true,
+          message: "Login successful",
+          token: accessToken,
+          refreshToken: refreshToken,
+        });
+    }
+  } catch (error) {
+    dbg.extend("login")("error", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error logging in",
+    });
+  }
 });
 
 //* Create Route

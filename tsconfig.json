@@ -4,6 +4,7 @@
     "isolatedModules": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "module": "CommonJS",
     "lib": ["DOM", "ESNext"],
     "target": "ESnext",
@@ -15,5 +16,5 @@
     "enable": true,
     "enableAutoDiscovery": true
   },
-  "files": ["models/Users.ts", "util/authentication.ts"]
+  "include": ["**/**/*.ts"]
 }
